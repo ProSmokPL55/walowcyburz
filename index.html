@@ -1,1 +1,1442 @@
-<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Storm Chaser Application</title>\n    <style>\n        body { font-family: Arial, sans-serif; }\n        .container { max-width: 800px; margin: auto; padding: 20px; }\n        h1 { text-align: center; }\n        .form-section { margin-bottom: 20px; }\n    </style>\n</head>\n<body>\n    <div class="container">\n        <h1>Storm Chaser Application</h1>\n        <div class="form-section">\n            <h2>Registration</h2>\n            <form id="registration-form">\n                <input type="text" placeholder="Username" required/><br/>\n                <input type="password" placeholder="Password" required/><br/>\n                <button type="submit">Register</button>\n            </form>\n        </div>\n        <div class="form-section">\n            <h2>Login</h2>\n            <form id="login-form">\n                <input type="text" placeholder="Username" required/><br/>\n                <input type="password" placeholder="Password" required/><br/>\n                <button type="submit">Login</button>\n            </form>\n        </div>\n        <div class="form-section">\n            <h2>Select Vehicle</h2>\n            <select id="vehicle-selection">\n                <option value="car">Car</option>\n                <option value="bike">Bike</option>\n                <option value="truck">Truck</option>\n            </select>\n        </div>\n        <div class="form-section">\n            <h2>Storm Reporting</h2>\n            <form id="report-storm-form">\n                <textarea placeholder="Describe the storm..." required></textarea><br/>\n                <button type="submit">Report Storm</button>\n            </form>\n            <h3>Map Integration</h3>\n            <div id="map">\n                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.8354345095154!2d144.95373631531664!3d-37.81627997975124!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad643a0b7e2f629%3A0x7b5b021cd46dcd8!2sMelbourne%20City%20Centre!5e0!3m2!1sen!2sau!4v1614037522877!5m2!1sen!2sau" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>\n            </div>\n        </div>\n    </div>\n</body>\n</html>\n
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storm Chaser - Alert System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --dark-bg: #0f0f0f;
+            --darker-bg: #1a1a1a;
+            --card-bg: #2a2a2a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --accent: #00d4ff;
+            --accent-hover: #00b8d4;
+            --danger: #ff4444;
+            --success: #44ff44;
+            --warning: #ffaa00;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+        }
+
+        /* AUTH SCREENS */
+        .auth-container {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .auth-container.active {
+            display: flex;
+        }
+
+        .auth-box {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .auth-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-align: center;
+            color: var(--accent);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--darker-bg);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: var(--dark-bg);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+        }
+
+        .btn-secondary {
+            background-color: var(--card-bg);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--accent);
+            color: var(--dark-bg);
+        }
+
+        .toggle-auth {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .toggle-auth a {
+            color: var(--accent);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        /* VEHICLE SELECTION SCREEN */
+        .vehicle-container {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background-color: var(--dark-bg);
+            flex-direction: column;
+        }
+
+        .vehicle-container.active {
+            display: flex;
+        }
+
+        .vehicle-header {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .vehicle-header h2 {
+            color: var(--accent);
+            font-size: 22px;
+        }
+
+        .vehicle-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .vehicle-card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .vehicle-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .vehicle-card.selected {
+            border-color: var(--accent);
+            background-color: rgba(0, 212, 255, 0.1);
+        }
+
+        .vehicle-info {
+            margin-bottom: 15px;
+        }
+
+        .vehicle-info-label {
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .vehicle-info-value {
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
+        .vehicle-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 8px;
+            font-size: 12px;
+        }
+
+        .vehicle-footer {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-top: 1px solid rgba(0, 212, 255, 0.2);
+            display: flex;
+            gap: 10px;
+        }
+
+        /* ADD VEHICLE FORM */
+        .add-vehicle-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .add-vehicle-modal.active {
+            display: flex;
+        }
+
+        .add-vehicle-form {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .add-vehicle-form h3 {
+            color: var(--accent);
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--darker-bg);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        /* MAP AND MAIN APP */
+        .app-container {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background-color: var(--dark-bg);
+            flex-direction: row;
+        }
+
+        .app-container.active {
+            display: flex;
+        }
+
+        .map-section {
+            flex: 1;
+            position: relative;
+            background-color: var(--darker-bg);
+        }
+
+        .map {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .map-controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .map-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background-color: var(--card-bg);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .map-btn:hover {
+            background-color: var(--accent);
+            color: var(--dark-bg);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+        }
+
+        .alert-button {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--danger), #ff6666);
+            border: 2px solid var(--danger);
+            color: white;
+            cursor: pointer;
+            font-size: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.5);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .alert-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(255, 68, 68, 0.8);
+        }
+
+        .sidebar {
+            width: 350px;
+            background-color: var(--card-bg);
+            border-left: 1px solid rgba(0, 212, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            background-color: var(--darker-bg);
+        }
+
+        .sidebar-header h3 {
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .user-info {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .reports-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .report-item {
+            background-color: var(--darker-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 3px solid var(--accent);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .report-item:hover {
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .report-item.storm {
+            border-left-color: var(--warning);
+        }
+
+        .report-item.incident {
+            border-left-color: var(--danger);
+        }
+
+        .report-type {
+            display: inline-block;
+            padding: 4px 8px;
+            background-color: var(--accent);
+            color: var(--dark-bg);
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .report-type.incident {
+            background-color: var(--danger);
+        }
+
+        .report-info {
+            font-size: 13px;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .report-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .report-photo {
+            width: 100%;
+            height: 80px;
+            background-color: var(--darker-bg);
+            border-radius: 4px;
+            margin-top: 10px;
+            object-fit: cover;
+        }
+
+        .sidebar-footer {
+            padding: 15px 20px;
+            border-top: 1px solid rgba(0, 212, 255, 0.2);
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-logout {
+            background-color: var(--danger);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background-color: #ff6666;
+        }
+
+        /* REPORT FORM MODAL */
+        .report-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+
+        .report-modal.active {
+            display: flex;
+        }
+
+        .report-form {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .report-form h3 {
+            color: var(--accent);
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--darker-bg);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            resize: vertical;
+            min-height: 80px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 20px;
+            background-color: var(--darker-bg);
+            border: 2px dashed rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+
+        .file-label:hover {
+            border-color: var(--accent);
+            background-color: rgba(0, 212, 255, 0.05);
+        }
+
+        .file-preview {
+            width: 100%;
+            height: 200px;
+            background-color: var(--darker-bg);
+            border-radius: 8px;
+            margin-top: 10px;
+            object-fit: cover;
+            display: none;
+        }
+
+        .file-preview.active {
+            display: block;
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .checkbox-item input[type="radio"] {
+            cursor: pointer;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            background-color: var(--darker-bg);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+
+        .btn-cancel:hover {
+            background-color: var(--accent);
+            color: var(--dark-bg);
+        }
+
+        .btn-submit {
+            flex: 1;
+            background-color: var(--success);
+            color: var(--dark-bg);
+        }
+
+        .btn-submit:hover {
+            background-color: #66ff66;
+        }
+
+        /* MAP MARKER TILE */
+        .map-marker {
+            width: 50px;
+            height: 50px;
+            background-color: var(--card-bg);
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+        }
+
+        .map-marker:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(0, 212, 255, 0.6);
+        }
+
+        .map-marker.storm {
+            border-color: var(--warning);
+            box-shadow: 0 0 15px rgba(255, 170, 0, 0.4);
+        }
+
+        .map-marker.storm:hover {
+            box-shadow: 0 0 25px rgba(255, 170, 0, 0.6);
+        }
+
+        .map-marker.incident {
+            border-color: var(--danger);
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.4);
+        }
+
+        .map-marker.incident:hover {
+            box-shadow: 0 0 25px rgba(255, 68, 68, 0.6);
+        }
+
+        /* SCROLLBAR STYLING */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--darker-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 212, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 212, 255, 0.5);
+        }
+
+        .error-message {
+            color: var(--danger);
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: 40%;
+                border-left: none;
+                border-top: 1px solid rgba(0, 212, 255, 0.2);
+            }
+
+            .vehicle-list {
+                grid-template-columns: 1fr;
+            }
+
+            .add-vehicle-form,
+            .report-form {
+                max-width: 95vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN/REGISTER SCREEN -->
+    <div class="auth-container active" id="authContainer">
+        <div class="auth-box">
+            <div class="auth-title" id="authTitle">
+                <i class="fas fa-cloud-bolt"></i> Storm Chaser
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginNickname">Nickname</label>
+                    <input type="text" id="loginNickname" placeholder="Enter your nickname" required>
+                    <span class="error-message" id="loginNicknameError"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                    <span class="error-message" id="loginPasswordError"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+
+            <form id="registerForm" style="display: none;">
+                <div class="form-group">
+                    <label for="regNickname">Nickname</label>
+                    <input type="text" id="regNickname" placeholder="Choose a nickname" required>
+                    <span class="error-message" id="regNicknameError"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="regPassword">Password</label>
+                    <input type="password" id="regPassword" placeholder="Create a password" required>
+                    <span class="error-message" id="regPasswordError"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="regPasswordConfirm">Confirm Password</label>
+                    <input type="password" id="regPasswordConfirm" placeholder="Confirm password" required>
+                    <span class="error-message" id="regPasswordConfirmError"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Register</button>
+            </form>
+
+            <div class="toggle-auth">
+                <span id="toggleText">Don't have an account? <a onclick="toggleAuthForm()">Register</a></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- VEHICLE SELECTION SCREEN -->
+    <div class="vehicle-container" id="vehicleContainer">
+        <div class="vehicle-header">
+            <h2><i class="fas fa-car"></i> Select Your Vehicle</h2>
+            <span style="color: var(--text-secondary);">Welcome, <strong id="vehicleUsername"></strong></span>
+        </div>
+
+        <div class="vehicle-list" id="vehicleList"></div>
+
+        <div class="vehicle-footer">
+            <button class="btn btn-primary" onclick="openAddVehicleForm()" style="flex: 1;">
+                <i class="fas fa-plus"></i> Add New Vehicle
+            </button>
+            <button class="btn btn-secondary" onclick="proceedToMap()" style="flex: 1; display: none;" id="proceedBtn">
+                <i class="fas fa-arrow-right"></i> Continue
+            </button>
+        </div>
+    </div>
+
+    <!-- ADD VEHICLE MODAL -->
+    <div class="add-vehicle-modal" id="addVehicleModal">
+        <form class="add-vehicle-form" id="addVehicleForm" onsubmit="handleAddVehicle(event)">
+            <h3><i class="fas fa-plus-circle"></i> Add New Vehicle</h3>
+
+            <div class="form-group">
+                <label for="vehicleMake">Make</label>
+                <select id="vehicleMake" required>
+                    <option value="">Select make...</option>
+                    <option value="Toyota">Toyota</option>
+                    <option value="Honda">Honda</option>
+                    <option value="Ford">Ford</option>
+                    <option value="Chevrolet">Chevrolet</option>
+                    <option value="BMW">BMW</option>
+                    <option value="Mercedes">Mercedes-Benz</option>
+                    <option value="Volkswagen">Volkswagen</option>
+                    <option value="Audi">Audi</option>
+                    <option value="Hyundai">Hyundai</option>
+                    <option value="Kia">Kia</option>
+                    <option value="Mazda">Mazda</option>
+                    <option value="Nissan">Nissan</option>
+                    <option value="Tesla">Tesla</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="vehicleModel">Model</label>
+                <input type="text" id="vehicleModel" placeholder="Enter vehicle model" required>
+            </div>
+
+            <div class="form-group">
+                <label for="vehicleBodyType">Body Type</label>
+                <select id="vehicleBodyType" required>
+                    <option value="">Select body type...</option>
+                    <option value="Sedan">Sedan</option>
+                    <option value="SUV">SUV</option>
+                    <option value="Truck">Truck</option>
+                    <option value="Wagon">Wagon</option>
+                    <option value="Coupe">Coupe</option>
+                    <option value="Hatchback">Hatchback</option>
+                    <option value="Convertible">Convertible</option>
+                    <option value="Van">Van</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="vehicleYear">Year</label>
+                <input type="number" id="vehicleYear" min="1900" max="2099" placeholder="2024" required>
+            </div>
+
+            <div class="form-group">
+                <label for="vehicleColor">Color</label>
+                <input type="text" id="vehicleColor" placeholder="Vehicle color" required>
+            </div>
+
+            <div class="form-buttons">
+                <button type="button" class="btn btn-cancel" onclick="closeAddVehicleForm()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Add Vehicle</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- MAIN APP -->
+    <div class="app-container" id="appContainer">
+        <div class="map-section">
+            <div id="map" class="map"></div>
+            <div class="map-controls">
+                <button class="map-btn" title="Zoom In" onclick="zoomIn()">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="map-btn" title="Zoom Out" onclick="zoomOut()">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button class="map-btn" title="My Location" onclick="centerMap()">
+                    <i class="fas fa-location-dot"></i>
+                </button>
+            </div>
+            <button class="alert-button" title="Report Alert" onclick="openReportForm()">
+                <i class="fas fa-exclamation"></i>
+            </button>
+        </div>
+
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-list"></i> Reports</h3>
+                <div class="user-info">
+                    User: <strong id="appUsername"></strong><br>
+                    Vehicle: <strong id="appVehicle"></strong>
+                </div>
+            </div>
+            <div class="reports-list" id="reportsList"></div>
+            <div class="sidebar-footer">
+                <button class="btn btn-logout" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- REPORT FORM MODAL -->
+    <div class="report-modal" id="reportModal">
+        <form class="report-form" id="reportForm" onsubmit="handleSubmitReport(event)">
+            <h3><i class="fas fa-triangle-exclamation"></i> Report Alert</h3>
+
+            <div class="form-group">
+                <label for="reportNickname">Nickname</label>
+                <input type="text" id="reportNickname" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="reportVehicle">Vehicle</label>
+                <input type="text" id="reportVehicle" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="reportBodyType">Body Type</label>
+                <input type="text" id="reportBodyType" readonly>
+            </div>
+
+            <div class="form-group">
+                <label>Alert Type</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-item">
+                        <input type="radio" name="alertType" value="storm" required checked>
+                        <i class="fas fa-cloud-bolt" style="color: var(--warning);"></i> Storm
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="radio" name="alertType" value="incident" required>
+                        <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i> Incident
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="reportDescription">Description</label>
+                <textarea id="reportDescription" placeholder="Describe the alert in detail..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Attach Photo</label>
+                <div class="file-input-wrapper">
+                    <label class="file-label" for="reportPhoto">
+                        <i class="fas fa-cloud-arrow-up" style="margin-right: 10px;"></i>
+                        Click to upload or drag and drop
+                    </label>
+                    <input type="file" id="reportPhoto" accept="image/*">
+                </div>
+                <img id="photoPreview" class="file-preview">
+            </div>
+
+            <div class="form-buttons">
+                <button type="button" class="btn btn-cancel" onclick="closeReportForm()">Cancel</button>
+                <button type="submit" class="btn btn-submit">Submit Report</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // ===== DATA STORAGE =====
+        let currentUser = null;
+        let selectedVehicle = null;
+        let currentZoom = 5;
+        let mapCenter = { lat: 39.8283, lng: -98.5795 }; // Center of USA
+        let reports = [];
+        let markers = new Map();
+
+        // ===== LOCAL STORAGE HELPERS =====
+        function saveUser(nickname, password) {
+            const users = JSON.parse(localStorage.getItem('stormChaserUsers') || '{}');
+            users[nickname] = password;
+            localStorage.setItem('stormChaserUsers', JSON.stringify(users));
+        }
+
+        function getUserPassword(nickname) {
+            const users = JSON.parse(localStorage.getItem('stormChaserUsers') || '{}');
+            return users[nickname];
+        }
+
+        function saveVehicle(nickname, vehicle) {
+            const vehicles = JSON.parse(localStorage.getItem('stormChaserVehicles') || '{}');
+            if (!vehicles[nickname]) {
+                vehicles[nickname] = [];
+            }
+            vehicles[nickname].push(vehicle);
+            localStorage.setItem('stormChaserVehicles', JSON.stringify(vehicles));
+        }
+
+        function getUserVehicles(nickname) {
+            const vehicles = JSON.parse(localStorage.getItem('stormChaserVehicles') || '{}');
+            return vehicles[nickname] || [];
+        }
+
+        function saveReports() {
+            localStorage.setItem('stormChaserReports', JSON.stringify(reports));
+        }
+
+        function loadReports() {
+            reports = JSON.parse(localStorage.getItem('stormChaserReports') || '[]');
+        }
+
+        // ===== AUTH FUNCTIONS =====
+        function toggleAuthForm() {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const toggleText = document.getElementById('toggleText');
+
+            if (loginForm.style.display === 'none') {
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+                toggleText.innerHTML = `Don't have an account? <a onclick="toggleAuthForm()">Register</a>`;
+            } else {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+                toggleText.innerHTML = `Already have an account? <a onclick="toggleAuthForm()">Login</a>`;
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nickname = document.getElementById('loginNickname').value;
+            const password = document.getElementById('loginPassword').value;
+
+            // Clear errors
+            document.getElementById('loginNicknameError').classList.remove('show');
+            document.getElementById('loginPasswordError').classList.remove('show');
+
+            if (!nickname || !password) {
+                if (!nickname) {
+                    document.getElementById('loginNicknameError').textContent = 'Nickname is required';
+                    document.getElementById('loginNicknameError').classList.add('show');
+                }
+                if (!password) {
+                    document.getElementById('loginPasswordError').textContent = 'Password is required';
+                    document.getElementById('loginPasswordError').classList.add('show');
+                }
+                return;
+            }
+
+            const storedPassword = getUserPassword(nickname);
+            if (!storedPassword || storedPassword !== password) {
+                document.getElementById('loginPasswordError').textContent = 'Invalid nickname or password';
+                document.getElementById('loginPasswordError').classList.add('show');
+                return;
+            }
+
+            currentUser = nickname;
+            goToVehicleSelection();
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nickname = document.getElementById('regNickname').value;
+            const password = document.getElementById('regPassword').value;
+            const passwordConfirm = document.getElementById('regPasswordConfirm').value;
+
+            // Clear errors
+            document.getElementById('regNicknameError').classList.remove('show');
+            document.getElementById('regPasswordError').classList.remove('show');
+            document.getElementById('regPasswordConfirmError').classList.remove('show');
+
+            let hasError = false;
+
+            if (!nickname) {
+                document.getElementById('regNicknameError').textContent = 'Nickname is required';
+                document.getElementById('regNicknameError').classList.add('show');
+                hasError = true;
+            }
+
+            if (nickname && getUserPassword(nickname)) {
+                document.getElementById('regNicknameError').textContent = 'Nickname already exists';
+                document.getElementById('regNicknameError').classList.add('show');
+                hasError = true;
+            }
+
+            if (!password || password.length < 4) {
+                document.getElementById('regPasswordError').textContent = 'Password must be at least 4 characters';
+                document.getElementById('regPasswordError').classList.add('show');
+                hasError = true;
+            }
+
+            if (password !== passwordConfirm) {
+                document.getElementById('regPasswordConfirmError').textContent = 'Passwords do not match';
+                document.getElementById('regPasswordConfirmError').classList.add('show');
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            saveUser(nickname, password);
+            currentUser = nickname;
+            goToVehicleSelection();
+        });
+
+        // ===== VEHICLE SELECTION =====
+        function goToVehicleSelection() {
+            document.getElementById('authContainer').classList.remove('active');
+            document.getElementById('vehicleContainer').classList.add('active');
+            document.getElementById('vehicleUsername').textContent = currentUser;
+            loadVehicles();
+        }
+
+        function loadVehicles() {
+            const vehicleList = document.getElementById('vehicleList');
+            vehicleList.innerHTML = '';
+
+            const userVehicles = getUserVehicles(currentUser);
+
+            if (userVehicles.length === 0) {
+                vehicleList.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-secondary);">
+                        <i class="fas fa-car" style="font-size: 48px; margin-bottom: 20px; display: block;"></i>
+                        <p>No vehicles added yet. Add your first vehicle to get started!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            userVehicles.forEach((vehicle, index) => {
+                const card = document.createElement('div');
+                card.className = 'vehicle-card';
+                if (selectedVehicle === index) {
+                    card.classList.add('selected');
+                }
+                card.innerHTML = `
+                    <div class="vehicle-info">
+                        <div class="vehicle-info-label">Make</div>
+                        <div class="vehicle-info-value">${vehicle.make}</div>
+                    </div>
+                    <div class="vehicle-info">
+                        <div class="vehicle-info-label">Model</div>
+                        <div class="vehicle-info-value">${vehicle.model}</div>
+                    </div>
+                    <div class="vehicle-info">
+                        <div class="vehicle-info-label">Body Type</div>
+                        <div class="vehicle-info-value">${vehicle.bodyType}</div>
+                    </div>
+                    <div class="vehicle-info">
+                        <div class="vehicle-info-label">Year</div>
+                        <div class="vehicle-info-value">${vehicle.year}</div>
+                    </div>
+                    <div class="vehicle-info">
+                        <div class="vehicle-info-label">Color</div>
+                        <div class="vehicle-info-value">${vehicle.color}</div>
+                    </div>
+                `;
+                card.onclick = () => selectVehicle(index);
+                vehicleList.appendChild(card);
+            });
+
+            const proceedBtn = document.getElementById('proceedBtn');
+            if (userVehicles.length > 0 && selectedVehicle !== null) {
+                proceedBtn.style.display = 'block';
+            }
+        }
+
+        function selectVehicle(index) {
+            selectedVehicle = index;
+            loadVehicles();
+            document.getElementById('proceedBtn').style.display = 'block';
+        }
+
+        function openAddVehicleForm() {
+            document.getElementById('addVehicleModal').classList.add('active');
+        }
+
+        function closeAddVehicleForm() {
+            document.getElementById('addVehicleModal').classList.remove('active');
+            document.getElementById('addVehicleForm').reset();
+        }
+
+        function handleAddVehicle(event) {
+            event.preventDefault();
+
+            const vehicle = {
+                make: document.getElementById('vehicleMake').value,
+                model: document.getElementById('vehicleModel').value,
+                bodyType: document.getElementById('vehicleBodyType').value,
+                year: document.getElementById('vehicleYear').value,
+                color: document.getElementById('vehicleColor').value
+            };
+
+            saveVehicle(currentUser, vehicle);
+            closeAddVehicleForm();
+            loadVehicles();
+        }
+
+        function proceedToMap() {
+            document.getElementById('vehicleContainer').classList.remove('active');
+            document.getElementById('appContainer').classList.add('active');
+            loadReports();
+            initializeMap();
+            displayReports();
+
+            const userVehicles = getUserVehicles(currentUser);
+            const selectedVeh = userVehicles[selectedVehicle];
+            document.getElementById('appUsername').textContent = currentUser;
+            document.getElementById('appVehicle').textContent = `${selectedVeh.year} ${selectedVeh.make} ${selectedVeh.model}`;
+
+            // Pre-fill report form with user data
+            document.getElementById('reportNickname').value = currentUser;
+            document.getElementById('reportVehicle').value = `${selectedVeh.year} ${selectedVeh.make} ${selectedVeh.model}`;
+            document.getElementById('reportBodyType').value = selectedVeh.bodyType;
+        }
+
+        // ===== MAP FUNCTIONS =====
+        function initializeMap() {
+            // Using Leaflet.js for the map
+            if (window.L) {
+                const map = L.map('map').setView([mapCenter.lat, mapCenter.lng], currentZoom);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(map);
+
+                // Store map reference for later use
+                window.stormMap = map;
+
+                // Display markers
+                displayMapMarkers();
+            } else {
+                // Fallback if Leaflet not loaded
+                document.getElementById('map').innerHTML = `
+                    <div style="padding: 20px; text-align: center; color: var(--text-secondary);">
+                        <p>Map will display here. Markers represent active alerts.</p>
+                        <p style="margin-top: 20px; font-size: 12px;">Powered by OpenStreetMap</p>
+                    </div>
+                `;
+            }
+
+            // Load Leaflet if not already loaded
+            if (!window.L) {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+                document.head.appendChild(link);
+
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+                script.onload = () => {
+                    initializeMap();
+                };
+                document.head.appendChild(script);
+            }
+        }
+
+        function displayMapMarkers() {
+            if (window.stormMap) {
+                // Clear existing markers
+                markers.forEach(marker => window.stormMap.removeLayer(marker));
+                markers.clear();
+
+                // Add report markers
+                reports.forEach((report, index) => {
+                    const icon = report.type === 'storm' ? '⛈️' : '⚠️';
+                    const marker = L.marker(
+                        [report.lat, report.lng],
+                        {
+                            title: `${report.type === 'storm' ? 'Storm' : 'Incident'} - ${report.nickname}`
+                        }
+                    ).addTo(window.stormMap)
+                        .bindPopup(`
+                            <div style="color: #333; font-size: 12px;">
+                                <strong>${report.type === 'storm' ? '⛈️ Storm' : '⚠️ Incident'}</strong><br>
+                                By: ${report.nickname}<br>
+                                Vehicle: ${report.vehicle}<br>
+                                Time: ${new Date(report.timestamp).toLocaleTimeString()}
+                            </div>
+                        `);
+
+                    markers.set(index, marker);
+                });
+            }
+        }
+
+        function zoomIn() {
+            currentZoom = Math.min(currentZoom + 1, 19);
+            if (window.stormMap) {
+                window.stormMap.setZoom(currentZoom);
+            }
+        }
+
+        function zoomOut() {
+            currentZoom = Math.max(currentZoom - 1, 1);
+            if (window.stormMap) {
+                window.stormMap.setZoom(currentZoom);
+            }
+        }
+
+        function centerMap() {
+            if (window.stormMap) {
+                window.stormMap.setView([mapCenter.lat, mapCenter.lng], currentZoom);
+            }
+        }
+
+        // ===== REPORT FORM =====
+        function openReportForm() {
+            // Generate random location for demonstration
+            const randomLat = mapCenter.lat + (Math.random() - 0.5) * 10;
+            const randomLng = mapCenter.lng + (Math.random() - 0.5) * 10;
+
+            window.reportLocation = { lat: randomLat, lng: randomLng };
+            document.getElementById('reportModal').classList.add('active');
+        }
+
+        function closeReportForm() {
+            document.getElementById('reportModal').classList.remove('active');
+            document.getElementById('reportForm').reset();
+            document.getElementById('photoPreview').classList.remove('active');
+        }
+
+        // File upload preview
+        document.getElementById('reportPhoto').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const preview = document.getElementById('photoPreview');
+                    preview.src = event.target.result;
+                    preview.classList.add('active');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Drag and drop for file upload
+        const fileLabel = document.querySelector('.file-label');
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileLabel.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileLabel.addEventListener(eventName, () => {
+                fileLabel.style.backgroundColor = 'rgba(0, 212, 255, 0.1)';
+                fileLabel.style.borderColor = 'var(--accent)';
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileLabel.addEventListener(eventName, () => {
+                fileLabel.style.backgroundColor = '';
+                fileLabel.style.borderColor = '';
+            });
+        });
+
+        fileLabel.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            document.getElementById('reportPhoto').files = files;
+
+            // Trigger change event
+            const event = new Event('change', { bubbles: true });
+            document.getElementById('reportPhoto').dispatchEvent(event);
+        });
+
+        function handleSubmitReport(event) {
+            event.preventDefault();
+
+            const report = {
+                id: Date.now(),
+                nickname: document.getElementById('reportNickname').value,
+                vehicle: document.getElementById('reportVehicle').value,
+                bodyType: document.getElementById('reportBodyType').value,
+                type: document.querySelector('input[name="alertType"]:checked').value,
+                description: document.getElementById('reportDescription').value,
+                photo: document.getElementById('photoPreview').src || null,
+                lat: window.reportLocation.lat,
+                lng: window.reportLocation.lng,
+                timestamp: new Date().toISOString(),
+                location: `${window.reportLocation.lat.toFixed(4)}, ${window.reportLocation.lng.toFixed(4)}`
+            };
+
+            reports.push(report);
+            saveReports();
+            displayReports();
+            displayMapMarkers();
+            closeReportForm();
+        }
+
+        function displayReports() {
+            const reportsList = document.getElementById('reportsList');
+            reportsList.innerHTML = '';
+
+            if (reports.length === 0) {
+                reportsList.innerHTML = `
+                    <div style="text-align: center; color: var(--text-secondary); padding: 20px;">
+                        <i class="fas fa-bell-slash" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
+                        No reports yet
+                    </div>
+                `;
+                return;
+            }
+
+            // Display reports in reverse chronological order
+            [...reports].reverse().forEach(report => {
+                const reportItem = document.createElement('div');
+                reportItem.className = `report-item ${report.type}`;
+                reportItem.innerHTML = `
+                    <div class="report-type ${report.type}">
+                        ${report.type === 'storm' ? '⛈️ STORM' : '⚠️ INCIDENT'}
+                    </div>
+                    <div class="report-info">
+                        <strong>${report.nickname}</strong>
+                    </div>
+                    <div class="report-info">
+                        ${report.vehicle} (${report.bodyType})
+                    </div>
+                    <div class="report-info">
+                        📍 ${report.location}
+                    </div>
+                    <div class="report-info">
+                        ${report.description}
+                    </div>
+                    ${report.photo ? `<img src="${report.photo}" class="report-photo">` : ''}
+                    <div class="report-time">
+                        ${new Date(report.timestamp).toLocaleTimeString()}
+                    </div>
+                `;
+                reportsList.appendChild(reportItem);
+            });
+        }
+
+        // ===== LOGOUT =====
+        function logout() {
+            currentUser = null;
+            selectedVehicle = null;
+            document.getElementById('appContainer').classList.remove('active');
+            document.getElementById('vehicleContainer').classList.remove('active');
+            document.getElementById('authContainer').classList.add('active');
+            document.getElementById('loginForm').reset();
+            document.getElementById('registerForm').reset();
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('toggleText').innerHTML = `Don't have an account? <a onclick="toggleAuthForm()">Register</a>`;
+        }
+
+        // Initialize on page load
+        loadReports();
+    </script>
+</body>
+</html>
