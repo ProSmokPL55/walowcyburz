@@ -886,11 +886,14 @@
                 </div>
             </div>
             <div class="reports-list" id="reportsList"></div>
-            <div class="sidebar-footer">
-                <button class="btn btn-logout" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-            </div>
+           <div class="sidebar-footer" style="display: flex; gap: 10px;">
+    <button class="btn btn-logout" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
+    <button class="btn btn-danger" onclick="clearReports()">
+        <i class="fas fa-trash"></i> Clear Reports
+    </button>
+</div>
         </div>
     </div>
 
