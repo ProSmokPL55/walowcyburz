@@ -934,11 +934,6 @@
             </div>
 
             <div class="form-group">
-    <label for="reportCity">Miejscowość</label>
-    <input type="text" id="reportCity" placeholder="Wpisz miejscowość" required>
-            </div>
-
-            <div class="form-group">
                 <label>Attach Photo</label>
                 <div class="file-input-wrapper">
                     <label class="file-label" for="reportPhoto">
@@ -1295,31 +1290,14 @@
         }
 
         // ===== REPORT FORM =====
-       function openReportForm() {
-    // Sprawdź, czy przeglądarka obsługuje geolokalizację
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                // Pobranie współrzędnych użytkownika
-                window.reportLocation = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
-                document.getElementById('reportModal').classList.add('active');
-            },
-            (error) => {
-                console.error('Geolocation error:', error);
-                // Jeśli błąd, użyj domyślnego centrum mapy
-                window.reportLocation = { ...mapCenter };
-                document.getElementById('reportModal').classList.add('active');
-            }
-        );
-    } else {
-        // Jeśli przeglądarka nie obsługuje geolokalizacji
-        window.reportLocation = { ...mapCenter };
-        document.getElementById('reportModal').classList.add('active');
-    }
-}
+        function openReportForm() {
+            // Generate random location for demonstration
+            const randomLat = mapCenter.lat + (Math.random() - 0.5) * 10;
+            const randomLng = mapCenter.lng + (Math.random() - 0.5) * 10;
+
+            window.reportLocation = { lat: randomLat, lng: randomLng };
+            document.getElementById('reportModal').classList.add('active');
+        }
 
         function closeReportForm() {
             document.getElementById('reportModal').classList.remove('active');
@@ -1376,55 +1354,43 @@
             document.getElementById('reportPhoto').dispatchEvent(event);
         });
 
-function handleSubmitReport(event) {
-    event.preventDefault();
+        function handleSubmitReport(event) {
+            event.preventDefault();
 
-    const now = Date.now();
-    const expireTime = now + 2 * 60 * 60 * 1000; // 2 godziny w ms
+            const report = {
+                id: Date.now(),
+                nickname: document.getElementById('reportNickname').value,
+                vehicle: document.getElementById('reportVehicle').value,
+                bodyType: document.getElementById('reportBodyType').value,
+                type: document.querySelector('input[name="alertType"]:checked').value,
+                description: document.getElementById('reportDescription').value,
+                photo: document.getElementById('photoPreview').src || null,
+                lat: window.reportLocation.lat,
+                lng: window.reportLocation.lng,
+                timestamp: new Date().toISOString(),
+                location: `${window.reportLocation.lat.toFixed(4)}, ${window.reportLocation.lng.toFixed(4)}`
+            };
 
-    const report = {
-        id: Date.now(),
-        nickname: document.getElementById('reportNickname').value,
-        vehicle: document.getElementById('reportVehicle').value,
-        bodyType: document.getElementById('reportBodyType').value,
-        type: document.querySelector('input[name="alertType"]:checked').value,
-        description: document.getElementById('reportDescription').value,
-        city: document.getElementById('reportCity').value,
-        photo: document.getElementById('photoPreview').src || null,
-        lat: window.reportLocation.lat,
-        lng: window.reportLocation.lng,
-        timestamp: now,
-        expire: expireTime
-    };
-
-    reports.push(report);
-    saveReports();
-    displayReports();
-    displayMapMarkers();
-    closeReportForm();
-}
+            reports.push(report);
+            saveReports();
+            displayReports();
+            displayMapMarkers();
+            closeReportForm();
+        }
 
         function displayReports() {
-    // Usuń przeterminowane raporty
-    const now = Date.now();
-    reports = reports.filter(r => r.expire > now);
-    saveReports();
+            const reportsList = document.getElementById('reportsList');
+            reportsList.innerHTML = '';
 
-    const reportsList = document.getElementById('reportsList');
-    reportsList.innerHTML = '';
-
-    if (reports.length === 0) {
-        reportsList.innerHTML = `
-            <div style="text-align: center; color: var(--text-secondary); padding: 20px;">
-                <i class="fas fa-bell-slash" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
-                No reports yet
-            </div>
-        `;
-        return;
-    }
-
-    ...
-}
+            if (reports.length === 0) {
+                reportsList.innerHTML = `
+                    <div style="text-align: center; color: var(--text-secondary); padding: 20px;">
+                        <i class="fas fa-bell-slash" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
+                        No reports yet
+                    </div>
+                `;
+                return;
+            }
 
             // Display reports in reverse chronological order
             [...reports].reverse().forEach(report => {
