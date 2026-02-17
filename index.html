@@ -1295,37 +1295,30 @@
         }
 
         // ===== REPORT FORM =====
-        function openReportForm() {
-    const cityInput = document.getElementById('reportCity').value;
-
-    if (!cityInput) {
-        // jeśli pole puste, ustaw mapę w centrum jako domyślną
+       function openReportForm() {
+    // Sprawdź, czy przeglądarka obsługuje geolokalizację
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                // Pobranie współrzędnych użytkownika
+                window.reportLocation = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+                document.getElementById('reportModal').classList.add('active');
+            },
+            (error) => {
+                console.error('Geolocation error:', error);
+                // Jeśli błąd, użyj domyślnego centrum mapy
+                window.reportLocation = { ...mapCenter };
+                document.getElementById('reportModal').classList.add('active');
+            }
+        );
+    } else {
+        // Jeśli przeglądarka nie obsługuje geolokalizacji
         window.reportLocation = { ...mapCenter };
         document.getElementById('reportModal').classList.add('active');
-        return;
     }
-
-    // Używamy OpenStreetMap Nominatim do geokodowania
-    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cityInput)}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data && data.length > 0) {
-                // pobieramy pierwszą lokalizację z wyników
-                window.reportLocation = {
-                    lat: parseFloat(data[0].lat),
-                    lng: parseFloat(data[0].lon)
-                };
-            } else {
-                // jeśli nie znaleziono miasta, ustaw domyślne współrzędne
-                window.reportLocation = { ...mapCenter };
-            }
-            document.getElementById('reportModal').classList.add('active');
-        })
-        .catch(err => {
-            console.error('Geocoding error:', err);
-            window.reportLocation = { ...mapCenter };
-            document.getElementById('reportModal').classList.add('active');
-        });
 }
 
         function closeReportForm() {
