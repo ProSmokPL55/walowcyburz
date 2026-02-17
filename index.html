@@ -1296,13 +1296,37 @@
 
         // ===== REPORT FORM =====
         function openReportForm() {
-            // Generate random location for demonstration
-            const randomLat = mapCenter.lat + (Math.random() - 0.5) * 10;
-            const randomLng = mapCenter.lng + (Math.random() - 0.5) * 10;
+    const cityInput = document.getElementById('reportCity').value;
 
-            window.reportLocation = { lat: randomLat, lng: randomLng };
+    if (!cityInput) {
+        // jeśli pole puste, ustaw mapę w centrum jako domyślną
+        window.reportLocation = { ...mapCenter };
+        document.getElementById('reportModal').classList.add('active');
+        return;
+    }
+
+    // Używamy OpenStreetMap Nominatim do geokodowania
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cityInput)}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.length > 0) {
+                // pobieramy pierwszą lokalizację z wyników
+                window.reportLocation = {
+                    lat: parseFloat(data[0].lat),
+                    lng: parseFloat(data[0].lon)
+                };
+            } else {
+                // jeśli nie znaleziono miasta, ustaw domyślne współrzędne
+                window.reportLocation = { ...mapCenter };
+            }
             document.getElementById('reportModal').classList.add('active');
-        }
+        })
+        .catch(err => {
+            console.error('Geocoding error:', err);
+            window.reportLocation = { ...mapCenter };
+            document.getElementById('reportModal').classList.add('active');
+        });
+}
 
         function closeReportForm() {
             document.getElementById('reportModal').classList.remove('active');
@@ -1388,18 +1412,26 @@ function handleSubmitReport(event) {
 }
 
         function displayReports() {
-            const reportsList = document.getElementById('reportsList');
-            reportsList.innerHTML = '';
+    // Usuń przeterminowane raporty
+    const now = Date.now();
+    reports = reports.filter(r => r.expire > now);
+    saveReports();
 
-            if (reports.length === 0) {
-                reportsList.innerHTML = `
-                    <div style="text-align: center; color: var(--text-secondary); padding: 20px;">
-                        <i class="fas fa-bell-slash" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
-                        No reports yet
-                    </div>
-                `;
-                return;
-            }
+    const reportsList = document.getElementById('reportsList');
+    reportsList.innerHTML = '';
+
+    if (reports.length === 0) {
+        reportsList.innerHTML = `
+            <div style="text-align: center; color: var(--text-secondary); padding: 20px;">
+                <i class="fas fa-bell-slash" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
+                No reports yet
+            </div>
+        `;
+        return;
+    }
+
+    ...
+}
 
             // Display reports in reverse chronological order
             [...reports].reverse().forEach(report => {
