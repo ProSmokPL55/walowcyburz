@@ -934,6 +934,11 @@
             </div>
 
             <div class="form-group">
+    <label for="reportCity">Miejscowość</label>
+    <input type="text" id="reportCity" placeholder="Wpisz miejscowość" required>
+            </div>
+
+            <div class="form-group">
                 <label>Attach Photo</label>
                 <div class="file-input-wrapper">
                     <label class="file-label" for="reportPhoto">
@@ -1354,29 +1359,33 @@
             document.getElementById('reportPhoto').dispatchEvent(event);
         });
 
-        function handleSubmitReport(event) {
-            event.preventDefault();
+function handleSubmitReport(event) {
+    event.preventDefault();
 
-            const report = {
-                id: Date.now(),
-                nickname: document.getElementById('reportNickname').value,
-                vehicle: document.getElementById('reportVehicle').value,
-                bodyType: document.getElementById('reportBodyType').value,
-                type: document.querySelector('input[name="alertType"]:checked').value,
-                description: document.getElementById('reportDescription').value,
-                photo: document.getElementById('photoPreview').src || null,
-                lat: window.reportLocation.lat,
-                lng: window.reportLocation.lng,
-                timestamp: new Date().toISOString(),
-                location: `${window.reportLocation.lat.toFixed(4)}, ${window.reportLocation.lng.toFixed(4)}`
-            };
+    const now = Date.now();
+    const expireTime = now + 2 * 60 * 60 * 1000; // 2 godziny w ms
 
-            reports.push(report);
-            saveReports();
-            displayReports();
-            displayMapMarkers();
-            closeReportForm();
-        }
+    const report = {
+        id: Date.now(),
+        nickname: document.getElementById('reportNickname').value,
+        vehicle: document.getElementById('reportVehicle').value,
+        bodyType: document.getElementById('reportBodyType').value,
+        type: document.querySelector('input[name="alertType"]:checked').value,
+        description: document.getElementById('reportDescription').value,
+        city: document.getElementById('reportCity').value,
+        photo: document.getElementById('photoPreview').src || null,
+        lat: window.reportLocation.lat,
+        lng: window.reportLocation.lng,
+        timestamp: now,
+        expire: expireTime
+    };
+
+    reports.push(report);
+    saveReports();
+    displayReports();
+    displayMapMarkers();
+    closeReportForm();
+}
 
         function displayReports() {
             const reportsList = document.getElementById('reportsList');
